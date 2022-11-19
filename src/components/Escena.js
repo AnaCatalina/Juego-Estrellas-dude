@@ -71,6 +71,7 @@ class Escena extends Phaser.Scene {
         this.stars.children.iterate(function (child) {
             child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
         });
+
         //Rebote contra las plataformas
         this.physics.add.collider(this.player, this.plataforms);
         this.physics.add.collider(this.stars, this.plataforms);
@@ -85,7 +86,7 @@ class Escena extends Phaser.Scene {
 
         //Agregamos las bombas y algunos colliders
         this.bombs = this.physics.add.group();
-        this.physics.add.collider(this.bombs, this.platforms);
+        this.physics.add.collider(this.bombs, this.plataforms);
         this.physics.add.collider(this.player, this.bombs, "hitBomb", null, this);
     }
 
@@ -104,9 +105,18 @@ class Escena extends Phaser.Scene {
         }
         //Salto según el personaje esté en el suelo y si se presiona la tecla arriba
         if (this.cursors.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-250);
+            this.player.setVelocityY(-300);
         }
     }
+
+    //Se llama desde el collider entre el jugador y las bombas
+    hitBomb(player, bomb) {
+        this.physics.pause();
+        player.setTint(0xff0000);
+        player.anims.play('turn');
+        //gameOver = true;
+    }
+
     //Se llama desde el collider entre el jugador y las estrellas
     collectStar(player, star) {
         star.disableBody(true, true);
@@ -120,19 +130,12 @@ class Escena extends Phaser.Scene {
 
             var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-            var bomb = this.bombs.create(x, 10, "bomb");
+            var bomb = this.bombs.create(x, 16, 'bomb');
             bomb.setBounce(1);
             bomb.setCollideWorldBounds(true);
             bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         }
-        //setPuntaje(this.score);
-    }
-    //Se llama desde el collider entre el jugador y las bombas
-    hitBomb(player, bomb) {
-        this.physics.pause();
-        player.setTint(0xff0000);
-        player.anims.play('turn');
-        //gameOver = true;
+        //this.setPuntaje(this.score);
     }
 }
 export default Escena;
