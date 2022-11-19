@@ -3,9 +3,10 @@ import Phaser from "phaser";
 class Escena extends Phaser.Scene {
 
     //Se cargan variables globales (se pueden usar constructores pero podrían dar problemas a futuro)
-    plataforms;
-    player;
-    cursors;
+    plataforms = null;
+    player = null;
+    cursors = null;
+    stars = null;
     score = 0;
     scoreText;
     bombs;
@@ -22,6 +23,8 @@ class Escena extends Phaser.Scene {
         //Se crea el fondo
         this.add.image(400, 300, "sky");
         //Se crean las plataformas
+        this.plataforms = this.physics.add.staticGroup();
+
         this.plataforms.create(400, 568, "ground").setScale(2).refreshBody();
 
         this.plataforms.create(600, 400, "ground");
@@ -29,15 +32,16 @@ class Escena extends Phaser.Scene {
         this.plataforms.create(750, 220, "ground");
 
         //Al personaje se le asigna el sprite
-        this.player = this.physics.add.sprite(100, 250, "dude");
+        this.player = this.physics.add.sprite(100, 450, "dude");
 
         //Seteando rebote y el choque con los límites del canva
-        this.player.setBounce(0.3);
+        this.player.setBounce(0.2);
         this.player.setCollideWorldBounds(true);
+        this.player.body.setGravityY(100);
 
         //Se crean los movimientos (que serán utilizados en el update)
         this.anims.create({
-            key: "left",
+            key: "izquierda",
             frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
             frameRate: 10,
             repeat: -1
@@ -55,20 +59,18 @@ class Escena extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
         });
-
         //Agregando estrellas
         this.stars = this.physics.add.group({
             key: "star",
             repeat: 15,
             setXY: { x: 12, 7: 0, stepX: 60 }
         });
+        //this.stars.setBounce(0.4);
 
-        this.stars.setBounce(0.4);
         //Esto si genera el rebote del grupo
         this.stars.children.iterate(function (child) {
-            child.setBounceY(Phaser.Math.FloatBetween(0.5, 0.9));
+            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
         });
-
         //Rebote contra las plataformas
         this.physics.add.collider(this.player, this.plataforms);
         this.physics.add.collider(this.stars, this.plataforms);
@@ -85,30 +87,28 @@ class Escena extends Phaser.Scene {
         this.bombs = this.physics.add.group();
         this.physics.add.collider(this.bombs, this.platforms);
         this.physics.add.collider(this.player, this.bombs, "hitBomb", null, this);
-
     }
 
     //Se ejectua constantemente, aqui van los movimientos, animaciones, acciones, presionar teclas, etc
     update() {
         //Movimientos según el cursor del teclado
         if (this.cursors.left.isDown) {
-            this.player.setVelocity(-160);
-            this.player.anims.play("left", true);
-        }
-        else if (this.cursors.right.isDown) {
-            this.player.setVelocity(160);
+            this.player.setVelocityX(-160);
+            this.player.anims.play("izquierda", true);
+        } else if (this.cursors.right.isDown) {
+            this.player.setVelocityX(160);
             this.player.anims.play("right", true);
-        }
-        else {
-            this.player.setVelocity(0);
+        } else {
+            this.player.setVelocityX(0);
             this.player.anims.play("turn");
         }
+        
         //Salto según el personaje esté en el suelo y si se presiona la tecla arriba
         if (this.cursors.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocity(-200);
+            this.player.setVelocityY(-250);
         }
-        //set
     }
+    /*
     //Se llama desde el collider entre el jugador y las estrellas
     collectStar(player, star) {
         star.disableBody(true, true);
@@ -134,6 +134,6 @@ class Escena extends Phaser.Scene {
         player.setTint(0xff0000);
         player.anims.play('turn');
         //gameOver = true;
-    }
+    }*/
 }
 export default Escena;
