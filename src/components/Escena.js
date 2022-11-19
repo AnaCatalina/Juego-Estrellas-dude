@@ -7,9 +7,9 @@ class Escena extends Phaser.Scene {
     player = null;
     cursors = null;
     stars = null;
+    bombs = null;
     score = 0;
     scoreText;
-    bombs;
     //Carga todos los recursos iniciales del juego que se van a utilizar (imagenes, sprites y sonido)
     preload() {
         this.load.image("sky", "img/sky.png");
@@ -32,10 +32,10 @@ class Escena extends Phaser.Scene {
         this.plataforms.create(750, 220, "ground");
 
         //Al personaje se le asigna el sprite
-        this.player = this.physics.add.sprite(100, 450, "dude");
+        this.player = this.physics.add.sprite(100, 300, "dude");
 
         //Seteando rebote y el choque con los límites del canva
-        this.player.setBounce(0.2);
+        this.player.setBounce(0.3);
         this.player.setCollideWorldBounds(true);
         this.player.body.setGravityY(100);
 
@@ -102,13 +102,11 @@ class Escena extends Phaser.Scene {
             this.player.setVelocityX(0);
             this.player.anims.play("turn");
         }
-        
         //Salto según el personaje esté en el suelo y si se presiona la tecla arriba
         if (this.cursors.up.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-250);
         }
     }
-    /*
     //Se llama desde el collider entre el jugador y las estrellas
     collectStar(player, star) {
         star.disableBody(true, true);
@@ -117,16 +115,17 @@ class Escena extends Phaser.Scene {
 
         if (this.stars.countActive(true) === 0) {
             this.stars.children.iterate(function (child) {
-                child.enableBody(true, child.x, 0, true, true);
+                this.child.enableBody(true, child.x, 0, true, true);
             });
+
+            var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+            var bomb = this.bombs.create(x, 10, "bomb");
+            bomb.setBounce(1);
+            bomb.setCollideWorldBounds(true);
+            bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         }
-
-        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-        var bomb = bomb.create(x, 10, "bomb");
-        this.bomb.setBounce(1);
-        this.bomb.setCollideWorldBounds(true);
-        this.bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        //setPuntaje(this.score);
     }
     //Se llama desde el collider entre el jugador y las bombas
     hitBomb(player, bomb) {
@@ -134,6 +133,6 @@ class Escena extends Phaser.Scene {
         player.setTint(0xff0000);
         player.anims.play('turn');
         //gameOver = true;
-    }*/
+    }
 }
 export default Escena;
