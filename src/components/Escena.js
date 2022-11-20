@@ -8,6 +8,7 @@ class Escena extends Phaser.Scene {
     cursors = null;
     stars = null;
     bombs = null;
+    gameOver = false;
     score = 0;
     scoreText;
     //Carga todos los recursos iniciales del juego que se van a utilizar (imagenes, sprites y sonido)
@@ -62,10 +63,9 @@ class Escena extends Phaser.Scene {
         //Agregando estrellas
         this.stars = this.physics.add.group({
             key: "star",
-            repeat: 15,
+            repeat: 13,
             setXY: { x: 12, 7: 0, stepX: 60 }
         });
-        //this.stars.setBounce(0.4);
 
         //Esto si genera el rebote del grupo
         this.stars.children.iterate(function (child) {
@@ -87,11 +87,14 @@ class Escena extends Phaser.Scene {
         //Agregamos las bombas y algunos colliders
         this.bombs = this.physics.add.group();
         this.physics.add.collider(this.bombs, this.plataforms);
-        this.physics.add.collider(this.player, this.bombs, "hitBomb", null, this);
+        this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
     }
 
     //Se ejectua constantemente, aqui van los movimientos, animaciones, acciones, presionar teclas, etc
     update() {
+        if (this.gameOver) {
+            return;
+        }
         //Movimientos según el cursor del teclado
         if (this.cursors.left.isDown) {
             this.player.setVelocityX(-160);
@@ -108,15 +111,13 @@ class Escena extends Phaser.Scene {
             this.player.setVelocityY(-300);
         }
     }
-
     //Se llama desde el collider entre el jugador y las bombas
     hitBomb(player, bomb) {
         this.physics.pause();
         player.setTint(0xff0000);
         player.anims.play('turn');
-        //gameOver = true;
+        this.gameOver = true;
     }
-
     //Se llama desde el collider entre el jugador y las estrellas
     collectStar(player, star) {
         star.disableBody(true, true);
@@ -125,7 +126,7 @@ class Escena extends Phaser.Scene {
 
         if (this.stars.countActive(true) === 0) {
             this.stars.children.iterate(function (child) {
-                this.child.enableBody(true, child.x, 0, true, true);
+                child.enableBody(true, child.x, 0, true, true);
             });
 
             var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
@@ -135,7 +136,6 @@ class Escena extends Phaser.Scene {
             bomb.setCollideWorldBounds(true);
             bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         }
-        //this.setPuntaje(this.score);
     }
 }
 export default Escena;
